@@ -29,7 +29,7 @@ class Tools():
         f.close()
         return lines[interval[0]:interval[1]]
 
-    def get_lines(self, string, index=False, maxlines=None):
+    def get_lines(self, string, maxlines=None):
         '''
         Read lines and retur an array with 
         the lines and the index
@@ -48,10 +48,7 @@ class Tools():
                 storeLines.append(lines[n])
                 storeIndex.append(n)
 
-        if index:
-            return storeLines, storeIndex
-        else:
-            return storeLines
+        return storeLines, storeIndex
 
     def which_calculation(self, maxlines=150):
         for key in self.calc_type.keys():

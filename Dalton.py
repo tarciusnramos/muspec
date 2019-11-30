@@ -27,7 +27,7 @@ class Initialize(tools.Tools):
         self.get_intensities()
 
     def get_a2f_exitations(self, polar='  Linear  '):
-        lines = self.get_lines(polar)
+        lines, _ = self.get_lines(polar)
         nmax = len(lines)
         self.energies = {}
         self.intensities = {}
@@ -40,8 +40,8 @@ class Initialize(tools.Tools):
             self.set_key(self.intensities, state, intensity)
 
     def get_energies(self):
-        lines = self.get_lines('@ Excitation energy : ')
-        state_lines = self.get_lines('@ Excited state no')
+        lines, _ = self.get_lines('@ Excitation energy : ')
+        state_lines, _ = self.get_lines('@ Excited state no')
         nmax = len(lines)
         self.energies = {}
         for n in range(nmax):
@@ -51,12 +51,12 @@ class Initialize(tools.Tools):
         
 
     def get_intensities(self):
-        lines = self.get_lines('@ Oscillator strength (LENGTH) ')
+        lines, _ = self.get_lines('@ Oscillator strength (LENGTH) ')
         self.intensities = {}
         if len(lines) % 3:
             print('The length of the Oscillator strength is not divisible by 3')
             return()
-        state_lines = self.get_lines('@ Excited state no')
+        state_lines, _ = self.get_lines('@ Excited state no')
         nmax = len(lines)
         nstates = int(nmax / 3)
         intensities = np.zeros(nmax)

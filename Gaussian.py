@@ -15,13 +15,13 @@ class Initialize(tools.Tools):
         self.prog = 'gau'
         self.calc_type = {'TD':False,
                           'CIS':False,
-                          #'CIS(D)':False,
+                          'ORB':True,
                           #'IR':False,
                           #'RAMAN':False
                           }
         self.calc_bib  = {'TD':self.get_exitations,
                           'CIS':self.get_exitations,
-                          #'CIS(D)':False,
+                          'ORB':self.get_orbitals,
                           #'IR':False,
                           #'RAMAN':False
                           }
@@ -29,7 +29,7 @@ class Initialize(tools.Tools):
         self.which_calculation()
             
     def get_exitations(self):
-        lines = self.get_lines('Excited State  ')
+        lines, _ = self.get_lines('Excited State  ')
         nmax = len(lines)
         self.energies = {}
         self.intensities = {}
@@ -43,11 +43,11 @@ class Initialize(tools.Tools):
 
     def get_transition_dipoles(self):
         string = 'Ground to excited state transition electric dipole moments (Au)'
-        _, line1 = self.get_lines(string, index=True)
+        _, line1 = self.get_lines(string)
         line1 = line1[0] + 2
         if not self.nstates:
             string = 'Ground to excited state transition velocity dipole moments (Au)'
-            _, line2 = self.get_lines(string, index=True)
+            _, line2 = self.get_lines(string)
             line1 = line2[0]
         else:
             line2 = line1 + self.nstates
@@ -56,10 +56,29 @@ class Initialize(tools.Tools):
 
     def get_permanent_dipoles(self):
         string = 'Dipole moment (field-independent basis, Debye)'
-        _, index = self.get_lines(string, index=True)
+        _, index = self.get_lines(string)
         lines = []
         for n in index:
             lines += self.get_lines_interval((n + 1, n + 2))
         #   X=             -9.8637    Y=              3.6963    Z=             -1.1599  Tot=             10.5972
         lines = [x.replace('X=','').replace('Y=','').replace('Z=','') for x in lines]
         self.pe_dipoles = np.array([np.array(x.split()[:3], float) for x in lines])
+
+    def get_orbitals(self):
+        string = 'Alpha  occ. eigenvalues --'
+        lines, _ = self.get_lines(string)
+        occ_orbitals = ' '.join(lines).replace(string, '')
+        self.nocc_orbitals = len(occ_orbitals)
+
+        string = 'Alpha virt. eigenvalues --'
+        lines, _ = self.get_lines(string)
+        virt_orbitals = ' '.join(lines).replace(string, '')
+        self.nvirt_orbitals = len(virt_orbitals)
+
+        orbitals = occ_orbitals + virt_orbitals
+
+        self.orbitals_energies = [float(x) for x in orbitals.split()]
+        self.orbitals_intensities = [1 for x in range(self.nocc_orbitals + self.nvirt_orbitals)]
+
+        print(self.orbitals_energies)
+        
